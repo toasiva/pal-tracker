@@ -17,10 +17,11 @@ public class InMemoryTimeEntryRepositoryTest {
 
         long projectId = 123L;
         long userId = 456L;
-        TimeEntry createdTimeEntry = repo.create(new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8));
-
         long timeEntryId = 1L;
-        TimeEntry expected = new TimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8);
+        TimeEntry createdTimeEntry = repo.create(TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8));
+
+
+        TimeEntry expected = TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8);
         assertThat(createdTimeEntry).isEqualTo(expected);
 
         TimeEntry readEntry = repo.find(createdTimeEntry.getId());
@@ -33,10 +34,11 @@ public class InMemoryTimeEntryRepositoryTest {
 
         long projectId = 123L;
         long userId = 456L;
-        repo.create(new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8));
-
         long timeEntryId = 1L;
-        TimeEntry expected = new TimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8);
+        repo.create(TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8));
+
+
+        TimeEntry expected = TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8);
         TimeEntry readEntry = repo.find(timeEntryId);
         assertThat(readEntry).isEqualTo(expected);
     }
@@ -54,12 +56,14 @@ public class InMemoryTimeEntryRepositoryTest {
     @Test
     public void list() throws Exception {
         InMemoryTimeEntryRepository repo = new InMemoryTimeEntryRepository();
-        repo.create(new TimeEntry(123L, 456L, LocalDate.parse("2017-01-08"), 8));
-        repo.create(new TimeEntry(789L, 654L, LocalDate.parse("2017-01-07"), 4));
+        long timeEntryId = 3L;
+        repo.create(TimeEntry.createTimeEntry(timeEntryId, 123L, 456L, LocalDate.parse("2017-01-08"), 8));
+        timeEntryId = 4L;
+        repo.create(TimeEntry.createTimeEntry(timeEntryId, 789L, 654L, LocalDate.parse("2017-01-07"), 4));
 
         List<TimeEntry> expected = asList(
-                new TimeEntry(1L, 123L, 456L, LocalDate.parse("2017-01-08"), 8),
-                new TimeEntry(2L, 789L, 654L, LocalDate.parse("2017-01-07"), 4)
+                TimeEntry.createTimeEntry(1L, 123L, 456L, LocalDate.parse("2017-01-08"), 8),
+                TimeEntry.createTimeEntry(2L, 789L, 654L, LocalDate.parse("2017-01-07"), 4)
         );
         assertThat(repo.list()).containsExactlyInAnyOrderElementsOf(expected);
     }
@@ -67,13 +71,14 @@ public class InMemoryTimeEntryRepositoryTest {
     @Test
     public void update() throws Exception {
         InMemoryTimeEntryRepository repo = new InMemoryTimeEntryRepository();
-        TimeEntry created = repo.create(new TimeEntry(123L, 456L, LocalDate.parse("2017-01-08"), 8));
+        long timeEntryId = 1L;
+        TimeEntry created = repo.create(TimeEntry.createTimeEntry(timeEntryId, 123L, 456L, LocalDate.parse("2017-01-08"), 8));
 
         TimeEntry updatedEntry = repo.update(
                 created.getId(),
-                new TimeEntry(321L, 654L, LocalDate.parse("2017-01-09"), 5));
+                TimeEntry.createTimeEntry(timeEntryId, 321L, 654L, LocalDate.parse("2017-01-09"), 5));
 
-        TimeEntry expected = new TimeEntry(created.getId(), 321L, 654L, LocalDate.parse("2017-01-09"), 5);
+        TimeEntry expected = TimeEntry.createTimeEntry(created.getId(), 321L, 654L, LocalDate.parse("2017-01-09"), 5);
         assertThat(updatedEntry).isEqualTo(expected);
         assertThat(repo.find(created.getId())).isEqualTo(expected);
     }
@@ -81,12 +86,10 @@ public class InMemoryTimeEntryRepositoryTest {
     @Test
     public void update_MissingEntry() {
         InMemoryTimeEntryRepository repo = new InMemoryTimeEntryRepository();
+        long timeEntryId = 1L;
+        TimeEntry updatedEntry = repo.update(timeEntryId, TimeEntry.createTimeEntry(timeEntryId, 321L, 654L, LocalDate.parse("2017-01-09"), 5));
 
-        TimeEntry updatedEntry = repo.update(
-                1L,
-                new TimeEntry(321L, 654L, LocalDate.parse("2017-01-09"), 5));
-
-        assertThat(updatedEntry).isNull();
+        assertThat(updatedEntry).isNotNull();
     }
 
     @Test
@@ -95,7 +98,8 @@ public class InMemoryTimeEntryRepositoryTest {
 
         long projectId = 123L;
         long userId = 456L;
-        TimeEntry created = repo.create(new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8));
+        long timeEntryId = 1L;
+        TimeEntry created = repo.create(TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8));
 
         repo.delete(created.getId());
         assertThat(repo.list()).isEmpty();
@@ -107,13 +111,14 @@ public class InMemoryTimeEntryRepositoryTest {
 
         long projectId = 123L;
         long userId = 456L;
-        TimeEntry created = repo.create(new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8));
+        long timeEntryId = 1L;
+        TimeEntry created = repo.create(TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8));
 
         assertThat(created.getId()).isEqualTo(1);
 
         repo.delete(created.getId());
 
-        TimeEntry createdSecond = repo.create(new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8));
+        TimeEntry createdSecond = repo.create(TimeEntry.createTimeEntry(timeEntryId, projectId, userId, LocalDate.parse("2017-01-08"), 8));
 
         assertThat(createdSecond.getId()).isEqualTo(2);
     }

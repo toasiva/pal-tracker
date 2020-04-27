@@ -4,6 +4,7 @@ import com.jayway.jsonpath.DocumentContext;
 import io.pivotal.pal.tracker.PalTrackerApplication;
 import io.pivotal.pal.tracker.TimeEntry;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -19,12 +21,16 @@ import static com.jayway.jsonpath.JsonPath.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(classes = PalTrackerApplication.class, webEnvironment = RANDOM_PORT)
-public class TimeEntryApiTest {
+// Wire up the Spring application
 
+@SpringBootTest(classes = PalTrackerApplication.class, webEnvironment = RANDOM_PORT)
+class TimeEntryApiTest {
+
+    // Use to call the TimeEntryController end-points
     @Autowired
     private TestRestTemplate restTemplate;
 
+    // Sample/test data
     private final long projectId = 123L;
     private final long userId = 456L;
     private TimeEntry timeEntry = new TimeEntry(projectId, userId, LocalDate.parse("2017-01-08"), 8);
@@ -33,9 +39,9 @@ public class TimeEntryApiTest {
     public void testCreate() throws Exception {
         ResponseEntity<String> createResponse = restTemplate.postForEntity("/time-entries", timeEntry, String.class);
 
-
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        // com.jayway.jsonpath.JsonPath.parse makes it easy to read JSON
         DocumentContext createJson = parse(createResponse.getBody());
         assertThat(createJson.read("$.id", Long.class)).isGreaterThan(0);
         assertThat(createJson.read("$.projectId", Long.class)).isEqualTo(projectId);
@@ -48,9 +54,7 @@ public class TimeEntryApiTest {
     public void testList() throws Exception {
         Long id = createTimeEntry();
 
-
         ResponseEntity<String> listResponse = restTemplate.getForEntity("/time-entries", String.class);
-
 
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
