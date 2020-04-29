@@ -17,6 +17,8 @@ jobs:
       run: sudo service mysql start
     - name: Make Gradle Executable
       run: chmod +x ./gradlew
+    - name: Make Migrate DB executable
+      run: chmod +x scripts/migrate-databases.sh
     - name: Create test database
       run: |
         mysql -uroot -proot < databases/tracker/create_databases.sql
